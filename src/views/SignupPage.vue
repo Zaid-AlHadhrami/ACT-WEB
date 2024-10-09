@@ -8,13 +8,18 @@
 <input type="text" v-model="email" placeholder="Email"> <br>
 <input type="password" v-model="password" placeholder="Password"> <br>
 
-<button @click="signUp">Sign Up</button>
+<button @click="signUp">Sign Up</button> <br>
+<RouterLink to="/login"> lgoin page </RouterLink>
 
 </div>
 </template>
+
+
 <script>
 
 
+import {auth} from "../FirebaseConfig" ;
+import {createUserWithEmailAndPassword } from "firebase/auth";
 export default {
     /* eslint-disable no-unused-vars */
     // eslint-disable-next-line vue/multi-word-component-names
@@ -23,9 +28,20 @@ export default {
         return {email:'',password:'', username:''}
     }, 
     methods: {
- signUp() {
-    console.log('Sign up button clicked'); // Debugging line to check if the method is triggered
-}
+      signUp() {
+
+   createUserWithEmailAndPassword(auth, this.email, this.password)
+      .then(async (userCredential) => {
+        const user = userCredential.user;
+        this.$router.replace('home')
+        alert("usear is created!");
+        console.log('User signed up:', this.email, user);  // Debugging line to confirm the user was signed up
+      })
+      .catch((error) => {
+        console.error('Error during sign up:', error.code, error.message);  // Debugging line for error handling
+        alert("Opps! " + error.message);
+      });
+  }
 
 },
 }

@@ -4,30 +4,45 @@
     <h3> Sign in </h3>
     <input type="text" v-model="email" placeholder="Email"> <br>
     <input type="password" v-model="password" placeholder="Password"> <br>
-    <button @click="login">Connection</button>
+    <button @click="login">Connection</button> <br>
+    <RouterLink to="SignUp"> Create an accout</RouterLink>
         </div>
     </template>
     
     <script>
-    
-    export default {
-            /* eslint-disable no-unused-vars */
-          // eslint-disable-next-line vue/multi-word-component-names
-        name : 'Login',
-        data(){
-            return {}
-        }, 
-        methods: {
-            login() {
 
-            console.log("you're logged in")
-                
-            }
-    
+import {auth} from "../FirebaseConfig" ;
+
+import {signInWithEmailAndPassword} from "firebase/auth";
+
+export default {
+        /* eslint-disable no-unused-vars */
+      // eslint-disable-next-line vue/multi-word-component-names
+    name : 'Login',
+    data(){
+        return {}
+    }, 
+    methods: {
+        login() {
+
+            signInWithEmailAndPassword(auth, this.email, this.password)
+  .then((userCredential) => {
+    // Signed in 
+    this.$router.replace('home')
+    const user = userCredential.user;
+ 
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+  });
+            
         }
+
     }
-    
-    </script>
+}
+
+</script>
     
     <style scoped>
     
