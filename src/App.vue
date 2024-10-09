@@ -1,16 +1,14 @@
 <template>
   <img alt="Vue logo" src="./assets/logo.png">
-  <LoginPage />
+<RouterView/>
 </template>
 
 <script>
-import LoginPage from './views/LoginPage.vue';
-//import SignupPage from './views/SignupPage.vue';
+
 
 export default {
   name: 'App',
   components: {
-    LoginPage,
 }
 }
 </script>
