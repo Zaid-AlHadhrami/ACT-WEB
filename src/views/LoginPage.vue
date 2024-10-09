@@ -4,9 +4,8 @@
     <h3> Sign in </h3>
     <input type="text" v-model="email" placeholder="Email"> <br>
     <input type="password" v-model="password" placeholder="Password"> <br>
-    <button @click="login">Connection</button> <br>
-    <RouterLink to="SignUp"> Create an accout</RouterLink>
-        </div>
+    <button @click="login">Login</button> <br>
+    <p>You don't have an account ?  <RouterLink to="/signUp"> You can create one here </RouterLink></p>        </div>
     </template>
     
     <script>
@@ -44,7 +43,7 @@ export default {
 
 </script>
     
-    <style scoped>
+    <style>
     
     .login{
         margin: 0;
