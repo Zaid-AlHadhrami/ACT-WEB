@@ -1,6 +1,6 @@
 import LoginPage from "./views/LoginPage.vue";
 import SignupPage from "./views/SignupPage.vue";
-
+import HomePage from "./views/HomePage.vue";
 import { createWebHistory, createRouter } from "vue-router"
 
 
@@ -26,6 +26,10 @@ const router = createRouter ({
             name: 'SignUp'
             , component : SignupPage
         },
+        {path: '/home',
+            name: 'Home',
+            component: HomePage
+        }
         
     ]
     });
