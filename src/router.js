@@ -1,6 +1,7 @@
 import LoginPage from "./views/LoginPage.vue";
 import SignupPage from "./views/SignupPage.vue";
 import HomePage from "./views/HomePage.vue";
+import SupportPage from "./views/SupportPage.vue"
 import { createWebHistory, createRouter } from "vue-router"
 import {auth} from './FirebaseConfig'
 
@@ -28,6 +29,11 @@ const router = createRouter ({
             meta:{
                 requiresAuth: true
         }
+        },
+        {
+            path:'/support',
+            name: "Support",
+            component:SupportPage,
         }
         
     ]

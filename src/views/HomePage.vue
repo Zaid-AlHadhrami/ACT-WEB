@@ -27,10 +27,11 @@
         </div>
       </div>
   
-      <div v-if="newClientVisible">
+      <div  class="clientForm " v-if="newClientVisible">
         <h2>Add New Client</h2>
         <input type="text" v-model="newClient.name" placeholder="Client Name" />
         <input type="email" v-model="newClient.email" placeholder="Client Email" />
+        <input type="phone" v-model="newClient.phoneNumber" placeholder="Client Number" />
         <button @click="saveClient">Save Client</button>
         <button @click="newClientVisible = false">Cancel</button>
       </div>
@@ -59,7 +60,8 @@
         newClientVisible: false,
         newClient: {
           name: '',
-          email: ''
+          email: '',
+          phoneNumber: ''
         }
       };
     },
@@ -69,10 +71,10 @@
     methods: {
       addClient() {
         this.newClientVisible = true;
-        this.newClient = { name: '', email: '' }; // Reset new client form
+        this.newClient = { name: '', email: '', phoneNumber:'' }; // Reset new client form
       },
       saveClient() {
-        if (this.newClient.name && this.newClient.email) {
+        if (this.newClient.name && this.newClient.email && this.newClient.phoneNumber ) {
           this.clients.push({ ...this.newClient });
           this.newClientVisible = false; // Hide the form after saving
         } else {
@@ -109,13 +111,14 @@
 .main-content {
   flex-grow: 1; /* Main content takes up the remaining space */
   padding: 20px; /* Optional padding */
+  align-items: center;
 }
   
   .client-list {
     margin-top: 100px;
     border-radius: 5px;
     background-color: white;
-    width: 800px; /* Set a fixed width for the list */
+    width: 50%; /* Set a fixed width for the list */
     margin: 0 auto; /* Center the list horizontally */
     display: flex;
     flex-direction: column; /* Stacks cards vertically */
@@ -167,6 +170,17 @@ img {
     color: #666666;
     border: none ;
     border-radius: 4px;
+  }
+
+  .clientForm{
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 50%;
+    margin: 0 auto;
+    margin-top: 3%;
+    padding: 10px;
   }
   
   .client-name,

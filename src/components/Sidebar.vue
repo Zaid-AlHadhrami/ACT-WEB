@@ -1,12 +1,10 @@
 <template>
     <div class="sidebar">
 
-
-
         <button>Dashboard</button>
-        <button>Clients</button>
-        <button>Support</button>
-        <button>Logout</button>
+        <button @click="NavTo('home')">Clients</button>
+        <button @click="NavTo('support')">Support</button>
+        <button @click="logout">Logout</button>
 
     </div>
   </template>
@@ -25,6 +23,9 @@
       }).catch(error => {
     console.error('Error during sign out:', error);
   });
+    },
+    NavTo(route){
+        this.$router.replace(route)
     }
 
     }
@@ -36,7 +37,7 @@
     height: 100vh;
     background-color: #171717;
     color: white;
-    width: 12%; /* Set the width of the sidebar */
+    width: 8%; /* Set the width of the sidebar */
 
   }
 
