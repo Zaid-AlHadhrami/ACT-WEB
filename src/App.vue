@@ -1,5 +1,4 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
 <RouterView/>
 </template>
 
@@ -24,7 +23,7 @@ html, body , #app {
 }
 #app {
 
-  background-color: #313236;
+  background-color: #EEEEEE;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
