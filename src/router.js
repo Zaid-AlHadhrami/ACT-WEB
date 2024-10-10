@@ -12,11 +12,6 @@ const router = createRouter ({
 
     routes: [
 
-          {
-            path: "/",
-            redirect: '/login',
-
-          },
 
         {path: '/login',
             name: 'Login',
@@ -39,9 +34,11 @@ const router = createRouter ({
     });
 
 
-    router.beforeEach((to, from, next) => {
-        const currentUser = auth.currentUser;
+
+   router.beforeEach((to, from, next) => {
+        const currentUser =  auth.currentUser;
         const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+
 
         if (requiresAuth && !currentUser) {
             if(to.path !== '/login') {
@@ -50,10 +47,10 @@ const router = createRouter ({
                 next();
             }}
         else if (!requiresAuth && currentUser && to.path === '/login'){
-             next('home');}
+             next('/home');}
         else {
             next();}
       });
-
+      
 
 export default router;
