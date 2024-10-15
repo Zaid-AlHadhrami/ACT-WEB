@@ -45,19 +45,13 @@
   
   <script>
   import { auth, db } from "../FirebaseConfig";
-import {  addDoc, collection  } from "firebase/firestore";
+import {  addDoc, collection, getDocs } from "firebase/firestore";
   import Sidebar from "@/components/Sidebar.vue";
   
   export default {
     data() {
       return {
-        clients: [
-          { id:'#01', name: 'John Doe', email: 'john.doe@example.com', phoneNumber: '(123) 456-7890' },
-          { id:'#02',name: 'Jane Smith', email: 'jane.smith@example.com', phoneNumber: '(987) 654-3210' },
-          { id:'#03', name: 'Alice Johnson', email: 'alice.j@example.com', phoneNumber: '(555) 123-4567' },
-          { id:'#04',name: 'Bob Brown', email: 'bob.brown@example.com', phoneNumber: '(444) 987-6543' },
-          { id:'#05',name: 'Charlie White', email: 'charlie.w@example.com', phoneNumber: '(222) 333-4444' }
-        ],
+        clients: [],
         newClientVisible: false,
         newClient: {
           id: '',
@@ -69,7 +63,11 @@ import {  addDoc, collection  } from "firebase/firestore";
     },
     components: {
       Sidebar
+    }, mounted() {
+
+      this.fetchData()
     },
+
     methods: {
       generateID(){
         var clientsNum = this.clients.length;
@@ -112,7 +110,16 @@ console.log(id);
         }).catch(error => {
           console.error('Error during sign out:', error);
         });
-      }
+      },
+      async fetchData() {
+      const querySnapshot = await getDocs(collection(db, "clients")); // Fetch data from the "clients" collection
+      this.clients = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      })); // Map and assign the data to the clients array
+      console.log(this.clients)
+    },
+
     }
   };
   </script>
