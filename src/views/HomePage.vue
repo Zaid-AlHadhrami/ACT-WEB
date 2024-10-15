@@ -32,7 +32,7 @@
         <input type="text" v-model="newClient.name" placeholder="Client Name" />
         <input type="email" v-model="newClient.email" placeholder="Client Email" />
         <input type="phone" v-model="newClient.phoneNumber" placeholder="Client Number" />
-        <button @click="saveClient">Save Client</button>
+        <button @click="saveData">Save Client</button>
         <button @click="newClientVisible = false">Cancel</button>
       </div>
       
@@ -44,7 +44,8 @@
   </template>
   
   <script>
-  import { auth } from "../FirebaseConfig";
+  import { auth, db } from "../FirebaseConfig";
+import {  addDoc, collection  } from "firebase/firestore";
   import Sidebar from "@/components/Sidebar.vue";
   
   export default {
@@ -59,6 +60,7 @@
         ],
         newClientVisible: false,
         newClient: {
+          id: '',
           name: '',
           email: '',
           phoneNumber: ''
@@ -69,9 +71,17 @@
       Sidebar
     },
     methods: {
+      generateID(){
+        var clientsNum = this.clients.length;
+        console.log(clientsNum);
+        var id = "#0" + (clientsNum+1);
+console.log(id);
+        return id;
+
+      },
       addClient() {
         this.newClientVisible = true;
-        this.newClient = { name: '', email: '', phoneNumber:'' }; // Reset new client form
+        this.newClient = { id:this.generateID(), name: '', email: '', phoneNumber:'' }; // Reset new client form
       },
       saveClient() {
         if (this.newClient.name && this.newClient.email && this.newClient.phoneNumber ) {
@@ -81,6 +91,21 @@
           alert('Please fill in all fields.');
         }
       },
+      
+      async saveData() {
+        try {
+    const docRef = await addDoc(collection(db, "clients"), {
+     id: this.generateID(),
+     name : this.newClient.name,
+     email : this.newClient.email,
+     phoneNumber : this.newClient.phoneNumber
+
+    });
+    console.log("Document written with ID: ", docRef.id);
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }    }
+      ,
       logout() {
         auth.signOut().then(() => {
           this.$router.replace('login');
