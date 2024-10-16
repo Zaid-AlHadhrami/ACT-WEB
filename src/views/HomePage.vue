@@ -9,7 +9,7 @@
       <div class="client-list">
         <div id="top-bar" class="flexD">      
            <h2>All Clients</h2>
-           <input placeholder="Search">
+           <input v-model="search" @input="performSearch" placeholder="Search">
             <button @click="addClient" id="addbutton"> <img :src="'https://img.icons8.com/?size=100&id=62888&format=png&color=666666'"> New client</button></div>
         <div id="clientRow" class="client-card flexD">
           <p>ClientID</p>
@@ -23,7 +23,7 @@
           <p>{{ client.name }}</p>
           <p>{{ client.email }}</p>
           <p>{{ client.phoneNumber }}</p>
-          <button> manage </button>
+         <button> manage </button>
         </div>
       </div>
   
@@ -45,13 +45,14 @@
   
   <script>
   import { auth, db } from "../FirebaseConfig";
-import {  addDoc, collection, getDocs } from "firebase/firestore";
+import {  addDoc, collection, getDocs, where, query, onSnapshot } from "firebase/firestore";
   import Sidebar from "@/components/Sidebar.vue";
   
   export default {
     data() {
       return {
         clients: [],
+        search:'',
         newClientVisible: false,
         newClient: {
           id: '',
@@ -64,7 +65,6 @@ import {  addDoc, collection, getDocs } from "firebase/firestore";
     components: {
       Sidebar
     }, mounted() {
-
       this.fetchData()
     },
 
@@ -81,14 +81,6 @@ console.log(id);
         this.newClientVisible = true;
         this.newClient = { id:this.generateID(), name: '', email: '', phoneNumber:'' }; // Reset new client form
       },
-      saveClient() {
-        if (this.newClient.name && this.newClient.email && this.newClient.phoneNumber ) {
-          this.clients.push({ ...this.newClient });
-          this.newClientVisible = false; // Hide the form after saving
-        } else {
-          alert('Please fill in all fields.');
-        }
-      },
       
       async saveData() {
         try {
@@ -102,7 +94,10 @@ console.log(id);
     console.log("Document written with ID: ", docRef.id);
   } catch (e) {
     console.error("Error adding document: ", e);
-  }    }
+  }   
+  this.clients.push({ ...this.newClient });
+  this.newClientVisible = false; // Hide the form after saving
+}
       ,
       logout() {
         auth.signOut().then(() => {
@@ -118,6 +113,26 @@ console.log(id);
         ...doc.data()
       })); // Map and assign the data to the clients array
       console.log(this.clients)
+    },
+
+    performSearch() {
+      // Create a reference to the collection
+      const clientsRef = collection(db, "clients");
+      
+      // Create a query to search by name
+      const q = query(
+        clientsRef,
+        where('name', '>=', this.search),
+        where('name', '<=', this.search + '\uf8ff') // Ensures all matching documents are retrieved
+      );
+
+      // Use onSnapshot to listen for real-time updates
+      onSnapshot(q, (querySnapshot) => {
+        this.clients = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log('Updated Search Results:', this.clients);
+      }, (error) => {
+        console.error("Error getting documents:", error);
+      });
     },
 
     }
@@ -155,7 +170,7 @@ console.log(id);
     display: flex;
     flex-direction: column; /* Stacks cards vertically */
     color: #000;
-    height: 550px;
+    min-height: 550px;
     padding: 10px;
   }
   
@@ -178,6 +193,9 @@ img {
   justify-content: space-between; /* Aligns items within the card */
 }
 
+.flexD p {
+  width: 100px;
+}
   .client-card {
     height: 30px;
     align-items: center; /* Vertically centers items */

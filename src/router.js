@@ -1,9 +1,9 @@
 import LoginPage from "./views/LoginPage.vue";
 import SignupPage from "./views/SignupPage.vue";
 import HomePage from "./views/HomePage.vue";
-import SupportPage from "./views/SupportPage.vue"
-import { createWebHistory, createRouter } from "vue-router"
-import {auth} from './FirebaseConfig'
+import SupportPage from "./views/SupportPage.vue";
+import { createWebHistory, createRouter } from "vue-router";
+import {auth} from './FirebaseConfig';
 
 
 const router = createRouter ({
@@ -13,6 +13,9 @@ const router = createRouter ({
 
     routes: [
 
+        {path: '/',
+            redirect: '/login'
+        },
 
         {path: '/login',
             name: 'Login',
