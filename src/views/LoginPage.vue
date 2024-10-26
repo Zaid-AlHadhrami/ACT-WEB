@@ -27,8 +27,9 @@ export default {
             signInWithEmailAndPassword(auth, this.email, this.password)
   .then((userCredential) => {
     // Signed in 
-    this.$router.replace('home')
     const user = userCredential.user;
+    this.$router.replace(`/home/${user.uid}`)
+
  
   })
   .catch((error) => {

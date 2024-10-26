@@ -2,8 +2,8 @@
     <div class="sidebar">
 
         <button>Dashboard</button>
-        <button @click="NavTo('home')">Clients</button>
-        <button @click="NavTo('support')">Support</button>
+        <button @click="NavTo(`/home/${userid}`)">Clients</button>
+        <button @click="NavTo('/support')">Support</button>
         <button @click="logout">Logout</button>
 
     </div>
@@ -11,9 +11,13 @@
   
   <script>
   import {auth} from "../FirebaseConfig" ;
+  
 
   export default {
     
+    props: {
+      userid : String 
+    },
     // eslint-disable-next-line
     name: "Sidebar",
     methods: {

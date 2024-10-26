@@ -26,7 +26,7 @@ const router = createRouter ({
             name: 'SignUp'
             , component : SignupPage
         },
-        {path: '/home',
+        {path: '/home/:id',
             name: 'Home',
             component: HomePage,
             meta:{
@@ -48,7 +48,6 @@ const router = createRouter ({
         const currentUser =  auth.currentUser;
         const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
 
-
         if (requiresAuth && !currentUser) {
             if(to.path !== '/login') {
                 next('/login');}
@@ -56,7 +55,7 @@ const router = createRouter ({
                 next();
             }}
         else if (!requiresAuth && currentUser && to.path === '/login'){
-             next('/home');}
+             next(`/home/${currentUser.uid}`);}
         else {
             next();}
       });

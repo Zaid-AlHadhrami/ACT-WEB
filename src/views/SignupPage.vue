@@ -16,14 +16,18 @@
 <script>
 
 
-import {auth} from "../FirebaseConfig" ;
+import {auth, db } from "../FirebaseConfig" ;
+import {doc, setDoc} from 'firebase/firestore'
 import {createUserWithEmailAndPassword } from "firebase/auth";
 export default {
     /* eslint-disable no-unused-vars */
     // eslint-disable-next-line vue/multi-word-component-names
     name : 'SignUp',
     data(){
-        return {email:'',password:'', username:''}
+        return {email:'',password:'', username:'', 
+
+
+        }
     }, 
     methods: {
       signUp() {
@@ -31,7 +35,9 @@ export default {
    createUserWithEmailAndPassword(auth, this.email, this.password)
       .then(async (userCredential) => {
         const user = userCredential.user;
-        this.$router.replace('home')
+        this.$router.replace(`/home/${user.uid}`)
+        // calling the method to store the managers data 
+        this.storeCreatedUserData(user);
         alert("usear is created!");
         console.log('User signed up:', this.email, user);  // Debugging line to confirm the user was signed up
       })
@@ -39,6 +45,17 @@ export default {
         console.error('Error during sign up:', error.code, error.message);  // Debugging line for error handling
         alert("Opps! " + error.message);
       });
+  },
+
+  async storeCreatedUserData(user){
+                        // Store user info in Firestore under the "restaurants" collection
+                const userDocRef = doc(db, "managers", user.uid); // Using user UID as the document identifier
+                await setDoc(userDocRef, {
+                    uid: user.uid,
+                    name: this.name,
+                    email: this.email
+                    // Add other user details here as needed
+                });
   }
 
 },

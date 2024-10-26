@@ -1,7 +1,7 @@
 <template>
     <div class="Home">
 
-      <Sidebar/> 
+      <Sidebar :userid=this.passingid /> 
       <div class="main-content">
 
         <h1>Client Management</h1>
@@ -45,12 +45,13 @@
   
   <script>
   import { auth, db } from "../FirebaseConfig";
-import {  addDoc, collection, getDocs, where, query, onSnapshot } from "firebase/firestore";
+import {  addDoc, collection, getDocs, doc, where, query, onSnapshot } from "firebase/firestore";
   import Sidebar from "@/components/Sidebar.vue";
   
   export default {
     data() {
       return {
+        passingid : null,
         clients: [],
         search:'',
         newClientVisible: false,
@@ -58,13 +59,17 @@ import {  addDoc, collection, getDocs, where, query, onSnapshot } from "firebase
           id: '',
           name: '',
           email: '',
-          phoneNumber: ''
+          phoneNumber: '',
+          managerRef: null
+
         }
       };
     },
     components: {
       Sidebar
     }, mounted() {
+      this.passingid = this.$route.params.id
+      this.managerRef = doc(db, "managers", this.$route.params.id )  ;
       this.fetchData()
     },
 
@@ -84,7 +89,7 @@ console.log(id);
       
       async saveData() {
         try {
-    const docRef = await addDoc(collection(db, "clients"), {
+    const docRef = await addDoc(collection(this.managerRef, "clients"), {
      id: this.generateID(),
      name : this.newClient.name,
      email : this.newClient.email,
@@ -107,7 +112,7 @@ console.log(id);
         });
       },
       async fetchData() {
-      const querySnapshot = await getDocs(collection(db, "clients")); // Fetch data from the "clients" collection
+      const querySnapshot = await getDocs(collection(this.managerRef, "clients")); // Fetch data from the "clients" collection
       this.clients = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data()
@@ -117,7 +122,7 @@ console.log(id);
 
     performSearch() {
       // Create a reference to the collection
-      const clientsRef = collection(db, "clients");
+      const clientsRef = collection(this.managerRef, "clients");
       
       // Create a query to search by name
       const q = query(

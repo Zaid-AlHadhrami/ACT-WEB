@@ -1,7 +1,7 @@
 <template>
 
 <div class="Support">
-<Sidebar/>
+<Sidebar :userid=this.idddd />
 
 <div class="main-content">
 
@@ -29,7 +29,10 @@ export default {
 
     name : 'SupportPage',
     data(){
-        return {}
+        return {
+            idddd: '5YTJHAfiIDOSggPAygACSSn70T13',
+
+        }
     }, 
 
     components: {
