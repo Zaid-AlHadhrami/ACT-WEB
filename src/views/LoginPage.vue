@@ -5,6 +5,9 @@
     <input type="text" v-model="email" placeholder="Email"> <br>
     <input type="password" v-model="password" placeholder="Password"> <br>
     <button @click="login">Login</button> <br>
+    <p>
+                <a href="#" @click.prevent="forgotPassword">Forgot Password?</a>
+            </p>
     <p>You don't have an account ?  <RouterLink to="/signUp"> You can create one here </RouterLink></p>        </div>
     </template>
     
@@ -12,7 +15,7 @@
 
 import {auth} from "../FirebaseConfig" ;
 
-import {signInWithEmailAndPassword} from "firebase/auth";
+import {signInWithEmailAndPassword, sendPasswordResetEmail} from "firebase/auth";
 
 export default {
         /* eslint-disable no-unused-vars */
@@ -37,7 +40,20 @@ export default {
     const errorMessage = error.message;
   });
             
-        }
+        },
+
+    forgotPassword(){
+        sendPasswordResetEmail(auth, this.email)
+  .then(() => {
+    // Password reset email sent!
+    // ..
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    // ..
+  });
+    }
 
     }
 }
