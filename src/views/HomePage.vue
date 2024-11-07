@@ -144,7 +144,7 @@ console.log(id);
   };
   </script>
   
-  <style scoped>
+  <style>
   body {
     margin: 0; /* Remove default margin */
   }

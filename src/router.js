@@ -1,3 +1,4 @@
+import ListPage from "./views/crypto-list.vue"
 import LoginPage from "./views/LoginPage.vue";
 import SignupPage from "./views/SignupPage.vue";
 import HomePage from "./views/HomePage.vue";
@@ -37,6 +38,12 @@ const router = createRouter ({
             path:'/support',
             name: "Support",
             component:SupportPage,
+        },
+
+        {path: '/cryptoList',
+            name: 'list',
+            component: ListPage
+
         }
         
     ]
