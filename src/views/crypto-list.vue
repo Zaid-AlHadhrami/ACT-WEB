@@ -34,8 +34,8 @@
             <span :class="{ active: tradeType === 'sell' }" @click="tradeType = 'sell'">Sell</span>
           </div>
           <div class="form-group">
-            <label for="amount">Amount ({{ selectedCoin.toUpperCase() }}):</label>
-            <input type="number" id="amount" v-model="tradeAmount" placeholder="Enter amount">
+            <label for="amount">Amount :</label>
+            <input type="number" id="amount" v-model="tradeAmount" placeholder="0.000$">
           </div>
           <div class="form-group">
             <label>Current Price (USD):</label>
@@ -198,6 +198,10 @@ body {
   flex: 1;
 }
 
+.trade-panel {
+  height: 600px;
+  margin: 20px;
+}
 .crypto-list, .trade-panel {
   background-color: white;
   border-radius: 12px;
@@ -225,7 +229,6 @@ body {
 }
 
 .trade-form {
-  align-items: center;
   display: flex;
   flex-direction: column;
 }
@@ -236,7 +239,8 @@ body {
   justify-content: space-between;
   border-radius: 10px; /* Rounded corners */
   padding: 8px;
-  width: 100%;
+  width: 90%;
+  align-self: center;
 
 }
 

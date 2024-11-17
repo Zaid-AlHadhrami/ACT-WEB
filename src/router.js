@@ -5,6 +5,7 @@ import HomePage from "./views/HomePage.vue";
 import SupportPage from "./views/SupportPage.vue";
 import { createWebHistory, createRouter } from "vue-router";
 import {auth} from './FirebaseConfig';
+import ClientPage from "./views/ClientPage.vue";
 
 
 const router = createRouter ({
@@ -44,6 +45,11 @@ const router = createRouter ({
             name: 'list',
             component: ListPage
 
+        }
+        , 
+        {path: '/client/:id',
+            name: 'client',
+            component: ClientPage
         }
         
     ]

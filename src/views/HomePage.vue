@@ -19,11 +19,11 @@
           <p>Actions</p>
         </div>
         <div class="client-card flexD" v-for="client in clients" :key="client.email">
-          <p>{{ client.id }}</p>
+          <p>{{ client.customId }}</p>
           <p>{{ client.name }}</p>
           <p>{{ client.email }}</p>
           <p>{{ client.phoneNumber }}</p>
-         <button> manage </button>
+         <button @click="navToC(client.id)"> manage </button>
         </div>
       </div>
   
@@ -56,7 +56,8 @@ import {  addDoc, collection, getDocs, doc, where, query, onSnapshot } from "fir
         search:'',
         newClientVisible: false,
         newClient: {
-          id: '',
+          id : '',
+          customId: '',
           name: '',
           email: '',
           phoneNumber: '',
@@ -84,18 +85,24 @@ console.log(id);
       },
       addClient() {
         this.newClientVisible = true;
-        this.newClient = { id:this.generateID(), name: '', email: '', phoneNumber:'' }; // Reset new client form
+        this.newClient = { customId:this.generateID(), name: '', email: '', phoneNumber:'' }; // Reset new client form
       },
       
       async saveData() {
+        const walletObject = {
+        balance: 0,
+        transactions: []
+      };
         try {
     const docRef = await addDoc(collection(this.managerRef, "clients"), {
-     id: this.generateID(),
+     customId: this.generateID(),
      name : this.newClient.name,
      email : this.newClient.email,
-     phoneNumber : this.newClient.phoneNumber
+     phoneNumber : this.newClient.phoneNumber,
+     wallet : walletObject
 
     });
+    this.newClient.id = docRef.id ;
     console.log("Document written with ID: ", docRef.id);
   } catch (e) {
     console.error("Error adding document: ", e);
@@ -139,6 +146,10 @@ console.log(id);
         console.error("Error getting documents:", error);
       });
     },
+    navToC(cid){
+      this.$router.replace(`/client/${cid}`);
+
+    }
 
     }
   };
