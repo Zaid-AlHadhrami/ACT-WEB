@@ -14,10 +14,13 @@
   
 
   export default {
-    
-    props: {
-      userid : String 
+    data() {
+      return {
+        userid : localStorage.getItem('userId')
+
+      }
     },
+    
     // eslint-disable-next-line
     name: "Sidebar",
     methods: {

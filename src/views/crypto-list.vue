@@ -42,6 +42,7 @@
           <div class="form-group">
             <label for="amount">Amount :</label>
             <input type="number" id="amount" v-model="tradeAmount" placeholder="0.000$">
+            <p> {{ message }}</p>
           </div>
           <div class="form-group">
             <label>Current Price (USD):</label>
@@ -76,6 +77,7 @@ export default {
   components: { PriceChart, Sidebar },
   data() {
     return {
+      message : "Enter value here",
       cryptoData: {},
       selectedCoin: 'bitcoin',
       tradeAmount: null,
@@ -138,7 +140,13 @@ export default {
 
   if (this.tradeType === 'buy') {
     // Check if user has enough USD balance
-    if (wallet.balance < totalAmount) {
+    if (wallet.balance < totalAmount || totalAmount === 0 ) {
+      if(wallet.balance < totalAmount) {
+        this.message = "Insuffiecent balance";
+        console.log("insuffiecnr balance")}
+      else {
+        this.message = "you have to enter a value bigger than 0.";
+        console.log("please enter a value")}
       return { success: false, message: "Insufficient balance" };
     }
     // Deduct the balance and update assets

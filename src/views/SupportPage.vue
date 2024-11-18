@@ -1,7 +1,7 @@
 <template>
 
 <div class="Support">
-<Sidebar :userid=this.idddd />
+<Sidebar/>
 
 <div class="main-content">
 
