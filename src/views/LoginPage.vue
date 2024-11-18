@@ -31,6 +31,8 @@ export default {
   .then((userCredential) => {
     // Signed in 
     const user = userCredential.user;
+    localStorage.setItem('userId', user.uid);
+
     this.$router.replace(`/home/${user.uid}`)
 
  

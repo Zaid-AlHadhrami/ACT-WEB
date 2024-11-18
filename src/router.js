@@ -41,7 +41,7 @@ const router = createRouter ({
             component:SupportPage,
         },
 
-        {path: '/cryptoList',
+        {path: '/cryptoList/:id',
             name: 'list',
             component: ListPage
 

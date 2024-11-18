@@ -23,7 +23,9 @@
     methods: {
         logout: function() {
       auth.signOut().then(() => {
-        this.$router.replace('login')
+        this.$router.replace('/login')
+        localStorage.removeItem('userId');
+
       }).catch(error => {
     console.error('Error during sign out:', error);
   });

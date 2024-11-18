@@ -18,10 +18,23 @@
             </li>
           </ul>
           <p v-else>No transactions available.</p>
+
+          <h4>Assets:</h4>
+          
+          <ul v-if="client.wallet?.assets && !isEmpty(client.wallet.assets)">
+            <li v-for="asset in client.wallet.assets" :key="asset.id">
+              <strong>{{ asset }} </strong>
+            </li>
+          </ul>
+          <p v-else>No assets available.</p>
         </div>
                 <!-- Form to Add Funds -->
                 <input type="number" v-model="fundsToAdd" placeholder="Amount to add" />
         <button @click="addFunds">Add Funds</button>
+
+        <br>
+
+        <button @click="navToOrderPage" > Trade </button>
       </div>
     </div>
   </template>
@@ -44,11 +57,18 @@
     },
     mounted() {
       this.passingid = this.$route.params.id;
-      this.managerRef = doc(db, "managers", 'y7XcdzZVDndgUaw7Sn4ST1Z4oeU2');
+      this.managerRef = doc(db, "managers", localStorage.getItem('userId'));
       this.fetchData();
     },
   
     methods: {
+      navToOrderPage(){
+      this.$router.replace(`/cryptolist/${this.passingid}`);
+
+    },
+      isEmpty(obj) {
+      return Object.keys(obj).length === 0;
+    },
       logout() {
         auth.signOut()
           .then(() => {
@@ -60,7 +80,7 @@
       },
   
       async fetchData() {
-        const docRef = doc(db, "managers", 'y7XcdzZVDndgUaw7Sn4ST1Z4oeU2', "clients", this.passingid);
+        const docRef = doc(this.managerRef, "clients", this.passingid);
         try {
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {

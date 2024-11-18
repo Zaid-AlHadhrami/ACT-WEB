@@ -30,7 +30,7 @@ export default {
     name : 'SupportPage',
     data(){
         return {
-            idddd: '5YTJHAfiIDOSggPAygACSSn70T13',
+            idddd: localStorage.getItem('userId'),
 
         }
     }, 

@@ -26,6 +26,12 @@
       </div>
     </div>
     <div class="right-section">
+
+      <div class="wallet">
+        <h3> {{ client.name }}'s wallet</h3>
+        <p><strong>Balance:</strong> ${{ client.wallet?.balance.toFixed(2) }}</p>
+        <p v-if="tradeType== 'sell'"> {{ capitalizeFirstLetter(selectedCoin) }} Amount: {{ client.wallet.assets?.[selectedCoin]?.amount ?? 0 }} </p>
+      </div>
       <div class="trade-panel">
         <h2>Trade {{ capitalizeFirstLetter(selectedCoin) }}</h2>
         <div class="trade-form">
@@ -47,7 +53,6 @@
           <button 
             @click="placeOrder" 
             :class="['trade-btn', tradeType]"
-            :disabled="!canPlaceOrder"
           >
             {{ tradeType === 'buy' ? 'Buy' : 'Sell' }} {{ selectedCoin.toUpperCase() }}
           </button>
@@ -61,6 +66,8 @@
 </template>
 
 <script>
+ import { db } from "../FirebaseConfig";
+ import { doc, getDoc, setDoc} from "firebase/firestore";
 import axios from 'axios';
 import PriceChart from '@/components/PriceChart.vue';
 import Sidebar from '@/components/Sidebar.vue';
@@ -74,6 +81,9 @@ export default {
       tradeAmount: null,
       tradePrice: null,
       tradeType: 'buy',
+      client: {},
+      passingid: null,
+      orderHistory: []
     };
   },
   methods: {
@@ -107,14 +117,6 @@ export default {
       this.tradePrice = this.getCurrentPrice();
     },
 
-    placeBuyOrder() {
-      // Implement buy order logic here
-      console.log(`Placing buy order for ${this.tradeAmount} ${this.selectedCoin} at $${this.tradePrice}`);
-    },
-    placeSellOrder() {
-      // Implement sell order logic here
-      console.log(`Placing sell order for ${this.tradeAmount} ${this.selectedCoin} at $${this.tradePrice}`);
-    },
 
     getCurrentPrice() {
       return this.cryptoData[this.selectedCoin]?.usd.toFixed(2) || '0.00';
@@ -123,40 +125,138 @@ export default {
       const currentPrice = parseFloat(this.getCurrentPrice());
       return this.tradeAmount * currentPrice || 0;
     },
+
     placeOrder() {
-      if (this.canPlaceOrder) {
+      const wallet = this.client.wallet;
+
         const totalAmount = this.calculateTotal();
-        if (this.tradeType === 'buy') {
-          if (this.walletBalance.usd >= totalAmount) {
-            this.walletBalance.usd -= totalAmount;
-            this.walletBalance[this.selectedCoin] += parseFloat(this.tradeAmount);
-            this.addToOrderHistory('buy');
-          } else {
-            alert("Insufficient USD balance");
-          }
-        } else { // sell
-          if (this.walletBalance[this.selectedCoin] >= this.tradeAmount) {
-            this.walletBalance.usd += totalAmount;
-            this.walletBalance[this.selectedCoin] -= parseFloat(this.tradeAmount);
-            this.addToOrderHistory('sell');
-          } else {
-            alert(`Insufficient ${this.selectedCoin.toUpperCase()} balance`);
-          }
-        }
-        this.tradeAmount = null; // Reset amount after order
-      }
+
+          // Ensure `assets` exists
+  if (!wallet.assets) {
+    wallet.assets = {};
+  }
+
+  if (this.tradeType === 'buy') {
+    // Check if user has enough USD balance
+    if (wallet.balance < totalAmount) {
+      return { success: false, message: "Insufficient balance" };
+    }
+    // Deduct the balance and update assets
+    wallet.balance -= totalAmount;
+    wallet.assets = this.updateAsset(wallet.assets, this.selectedCoin, this.tradeAmount, this.getCurrentPrice(), 'buy');
+
+  } else if (this.tradeType === 'sell') {
+    // Check if the user has enough of the selected coin
+    if (!wallet.assets[this.selectedCoin] || wallet.assets[this.selectedCoin].amount < this.tradeAmount) {
+      return { success: false, message: `Insufficient ${this.selectedCoin.toUpperCase()} balance` };
+    }
+    // Add to the balance and update assets
+    wallet.balance += totalAmount;
+    wallet.assets = this.updateAsset(wallet.assets, this.selectedCoin, this.tradeAmount, this.getCurrentPrice(), 'sell');
+  }
+
+  // Add transaction to history
+  const transaction = {
+    id: `tx-${Date.now()}`,
+    type: this.tradeType,
+    coin: this.selectedCoin,
+    amount: this.tradeAmount,
+    price: this.getCurrentPrice(),
+    date: new Date().toISOString()
+  };
+
+
+  // Update wallet data in the database
+   this.updateWalletData( wallet, transaction);
+   this.tradeAmount = null; // Reset amount after order
+
+  return { success: true, message: "Order placed successfully" };
+      
     },
+    
+    updateAsset(assets, selectedCoin, tradeAmount, price, tradeType) {
+  if (tradeType === 'buy') {
+    // If the asset exists, update the amount and average price
+    if (assets[selectedCoin]) {
+      const currentAsset = assets[selectedCoin];
+      const newAmount = currentAsset.amount + tradeAmount;
+      const newAveragePrice = ((currentAsset.amount * currentAsset.averagePrice) + (tradeAmount * price)) / newAmount;
+      assets[selectedCoin] = {
+        amount: newAmount,
+        averagePrice: newAveragePrice
+      };
+    } else {
+      // Asset does not exist, create a new entry
+      assets[selectedCoin] = {
+        amount: tradeAmount,
+        averagePrice: price
+      };
+    }
+  } else if (tradeType === 'sell') {
+    if (assets[selectedCoin]) {
+      assets[selectedCoin].amount -= tradeAmount;
+      if (assets[selectedCoin].amount === 0) {
+        delete assets[selectedCoin];
+      }
+    }
+  }
+  return assets;
+}
+
+    ,
     addToOrderHistory(type) {
-      this.orderHistory.unshift({
+      this.orderHistory.push({
         type: type,
         coin: this.selectedCoin,
         amount: this.tradeAmount,
         price: this.getCurrentPrice()
       });
-    }
+    },
+    async fetchData() {
+        const docRef = doc(db, "managers", localStorage.getItem('userId'), "clients", this.passingid);
+        try {
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            this.client = {
+              id: docSnap.id,
+              ...docSnap.data()
+            };
+            console.log(this.client);
+          } else {
+            console.log("No such document!");
+          }
+        } catch (error) {
+          console.error("Error fetching client data: ", error);
+        }
+      },
+
+      async updateWalletData(wallet, transaction) {
+
+        const docRef = doc(db, "managers", localStorage.getItem('userId'), "clients", this.passingid);
+
+  // Ensure transactions array exists
+  if (!wallet.transactions) {
+    wallet.transactions = [];
+  }
+
+  // Add the new transaction to the history
+  wallet.transactions.push(transaction);
+
+  // Update the Firestore document
+  try {
+        await setDoc(docRef, { wallet: this.client.wallet }, { merge: true });
+        console.log("Client data updated successfully.");
+      } catch (error) {
+        console.error("Error updating client data:", error);
+      }
+}
+
 
   },
+
   mounted() {
+    this.passingid = this.$route.params.id;
+      this.fetchData();
     this.fetchCryptoData();
   }
 }
@@ -202,7 +302,7 @@ body {
   height: 600px;
   margin: 20px;
 }
-.crypto-list, .trade-panel {
+.crypto-list, .trade-panel, .wallet {
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -292,6 +392,8 @@ body {
 }
 
 .trade-btn { 
+  align-self: center;
+  width: 30%;
  padding:10px; 
  border:none; 
  border-radius:4px; 
@@ -301,8 +403,14 @@ body {
  transition:.3s ease
 }
 
+.wallet {
+  background-color: white;
+  margin: 20px;
+}
+
 .trade-btn.buy { background-color:#4CAF50 } /* Green for buy */
 .trade-btn.sell { background-color:#f44336 } /* Red for sell */
 
 .trade-btn[disabled] { opacity:.5; cursor:not-allowed }
+
 </style>
