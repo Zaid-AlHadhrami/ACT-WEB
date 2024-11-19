@@ -41,7 +41,7 @@
           </div>
           <div class="form-group">
             <label for="amount">Amount :</label>
-            <input type="number" id="amount" v-model="tradeAmount" placeholder="0.000$">
+            <input type="number" @input="validateOrder" id="amount" v-model="tradeAmount" placeholder="0.000$">
             <p> {{ message }}</p>
           </div>
           <div class="form-group">
@@ -128,9 +128,37 @@ export default {
       return this.tradeAmount * currentPrice || 0;
     },
 
-    placeOrder() {
-      const wallet = this.client.wallet;
+    validateOrder() {
+  const wallet = this.client.wallet;
+  const totalAmount = this.calculateTotal();
 
+  if (totalAmount <= 0) {
+    this.message = "You have to enter a value bigger than 0.";
+    return false;
+  }
+
+  if (this.tradeType === 'buy') {
+    if (wallet.balance < totalAmount) {
+      this.message = "Insufficient balance";
+      return false;
+    }
+  } else if (this.tradeType === 'sell') {
+    if (!wallet.assets || !wallet.assets[this.selectedCoin] || wallet.assets[this.selectedCoin].amount < this.tradeAmount) {
+      this.message = `Insufficient ${this.selectedCoin.toUpperCase()} balance`;
+      return false;
+    }
+  }
+
+  this.message = ""; // Clear message if validation passes
+  return true;
+},
+
+    placeOrder() {
+      
+      if (!this.validateOrder()) {
+    return { success: false, message: this.message };
+  }
+      const wallet = this.client.wallet;
         const totalAmount = this.calculateTotal();
 
           // Ensure `assets` exists
@@ -138,27 +166,11 @@ export default {
     wallet.assets = {};
   }
 
+
   if (this.tradeType === 'buy') {
-    // Check if user has enough USD balance
-    if (wallet.balance < totalAmount || totalAmount === 0 ) {
-      if(wallet.balance < totalAmount) {
-        this.message = "Insuffiecent balance";
-        console.log("insuffiecnr balance")}
-      else {
-        this.message = "you have to enter a value bigger than 0.";
-        console.log("please enter a value")}
-      return { success: false, message: "Insufficient balance" };
-    }
-    // Deduct the balance and update assets
     wallet.balance -= totalAmount;
     wallet.assets = this.updateAsset(wallet.assets, this.selectedCoin, this.tradeAmount, this.getCurrentPrice(), 'buy');
-
   } else if (this.tradeType === 'sell') {
-    // Check if the user has enough of the selected coin
-    if (!wallet.assets[this.selectedCoin] || wallet.assets[this.selectedCoin].amount < this.tradeAmount) {
-      return { success: false, message: `Insufficient ${this.selectedCoin.toUpperCase()} balance` };
-    }
-    // Add to the balance and update assets
     wallet.balance += totalAmount;
     wallet.assets = this.updateAsset(wallet.assets, this.selectedCoin, this.tradeAmount, this.getCurrentPrice(), 'sell');
   }
