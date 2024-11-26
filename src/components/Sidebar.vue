@@ -1,7 +1,7 @@
 <template>
     <div class="sidebar">
 
-        <button>Dashboard</button>
+        <button @click="NavTo('/dashboard')">Dashboard</button>
         <button @click="NavTo(`/home/${userid}`)">Clients</button>
         <button @click="NavTo('/support')">Support</button>
         <button @click="logout">Logout</button>

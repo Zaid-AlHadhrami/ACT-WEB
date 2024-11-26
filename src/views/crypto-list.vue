@@ -6,7 +6,8 @@
     <div class="main-content" >
 
       <div class="left-section">
-        <PriceChart :selectedCoin="selectedCoin" class="chart" />
+        <PriceChart :mode="'crypto'" :selectedSymbol="selectedCoin" class="chart" />
+
       <div class="crypto-list">
         <div class="client-card header flexD">
           <p>Name</p> <p>Price</p> <p>24H change</p>
@@ -77,6 +78,7 @@ export default {
   components: { PriceChart, Sidebar },
   data() {
     return {
+
       message : "Enter value here",
       cryptoData: {},
       selectedCoin: 'bitcoin',
@@ -85,10 +87,31 @@ export default {
       tradeType: 'buy',
       client: {},
       passingid: null,
-      orderHistory: []
+      orderHistory: [],
+      symbols: ['AAPL', 'GOOGL', 'MSFT'], // Array of stock symbols
+      prices: {}
     };
   },
   methods: {
+
+    fetchPrices() {
+      this.prices = {}; // Reset prices
+      const API_KEY = 'ct2b3l1r01qiurr3qp20ct2b3l1r01qiurr3qp2g'; // Replace with your Finnhub API key
+      
+      this.symbols.forEach(symbol => {
+        const url = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`;
+        axios.get(url)
+          .then(response => {
+            this.prices[symbol] = response.data; // 'c' is the current price
+            console.log(response.data);
+                      })
+          .catch(error => {
+            console.error('Error fetching stock price for', symbol, ':', error);
+          });
+      });
+
+    },
+
     capitalizeFirstLetter(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
     },
@@ -278,6 +301,7 @@ export default {
     this.passingid = this.$route.params.id;
       this.fetchData();
     this.fetchCryptoData();
+    this.fetchPrices();
   }
 }
 </script>
