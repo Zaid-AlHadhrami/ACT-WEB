@@ -1,8 +1,6 @@
 <template>
     <div class="dashboard">
-  
         <Sidebar/> 
-
         <div class="main-content">
 
             <div v-if="manager" class="summary">

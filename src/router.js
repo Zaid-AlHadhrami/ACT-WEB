@@ -7,6 +7,7 @@ import { createWebHistory, createRouter } from "vue-router";
 import {auth} from './FirebaseConfig';
 import ClientPage from "./views/ClientPage.vue";
 import DashBoard from "./views/DashBoard.vue";
+import LandingPage from "./views/LandingPage.vue";
 
 
 const router = createRouter ({
@@ -21,7 +22,8 @@ const router = createRouter ({
             name:'Dashboard'
         },
         {path: '/',
-            redirect: '/login'
+            component: LandingPage,
+            name: 'Landing Page'
         },
 
         {path: '/login',

@@ -9,7 +9,7 @@
 <input type="password" v-model="password" placeholder="Password"> <br>
 
 <button @click="signUp">Sign Up</button> <br>
-<p> <RouterLink to="/login"> back to login.</RouterLink>  </p></div>
+<p> Already have an account? Click <RouterLink to="/login"> here.</RouterLink>  </p></div>
 </template>
 
 
