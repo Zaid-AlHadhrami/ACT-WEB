@@ -6,35 +6,62 @@
     <div class="main-content" >
 
       <div class="left-section">
-        <PriceChart :mode="'crypto'" :selectedSymbol="selectedCoin" class="chart" />
+        <div class="mode-toggle flexD">
+    <button @click="switchMode('crypto')" :class="{ active: mode === 'crypto' }">Crypto</button>
+    <button @click="switchMode('stock')" :class="{ active: mode === 'stock' }">Stocks</button>
+  </div>
+        <PriceChart :mode="mode" :selectedSymbol="selectedAsset" class="chart" />
 
-      <div class="crypto-list">
-        <div class="client-card header flexD">
-          <p>Name</p> <p>Price</p> <p>24H change</p>
-        </div>
-        <div 
-          v-for="(data, name) in cryptoData" 
-          :key="name" 
-          class="client-card flexD" 
-          @click="selectCoin(name)"
-        >
-          <p>{{ capitalizeFirstLetter(name) }}</p>
-          <p>${{ data.usd.toFixed(2) }}</p>
-          <p :style="{ color: data.usd_24h_change >= 0 ? 'green' : 'red' }">
-            {{ data.usd_24h_change.toFixed(2) }}%
-          </p>
-        </div>
-      </div>
+
+<div v-if="mode === 'crypto'" class="crypto-list">
+  <div class="client-card header flexD">
+    <p>Name</p>
+    <p>Price</p>
+    <p>24H change</p>
+  </div>
+  <div 
+    v-for="(data, name) in cryptoData" 
+    :key="name" 
+    class="client-card flexD" 
+    @click="selectAsset(name)"
+  >
+    <p>{{ capitalizeFirstLetter(name) }}</p>
+    <p>${{ data.usd.toFixed(2) }}</p>
+    <p :style="{ color: data.usd_24h_change >= 0 ? 'green' : 'red' }">
+      {{ data.usd_24h_change.toFixed(2) }}%
+    </p>
+  </div>
+</div>
+<div v-else class="crypto-list">
+  <div class="client-card header flexD">
+    <p>Symbol</p>
+    <p>Price</p>
+    <p>Change</p>
+  </div>
+  <div 
+    v-for="(data, symbol) in stockData" 
+    :key="symbol" 
+    class="client-card flexD" 
+    @click="selectAsset(symbol)"
+  >
+    <p>{{ symbol }}</p>
+    <p>${{ data.c.toFixed(2) }}</p>
+    <p :style="{ color: data.d >= 0 ? 'green' : 'red' }">
+      {{ data.d.toFixed(2) }}%
+    </p>
+  </div>
+</div>
+
     </div>
     <div class="right-section">
 
       <div class="wallet">
         <h3> {{ client.name }}'s wallet</h3>
         <p><strong>Balance:</strong> ${{ client.wallet?.balance.toFixed(2) }}</p>
-        <p v-if="tradeType== 'sell'"> {{ capitalizeFirstLetter(selectedCoin) }} Amount: {{ client.wallet.assets?.[selectedCoin]?.amount ?? 0 }} </p>
+        <p v-if="tradeType== 'sell'"> {{ capitalizeFirstLetter(selectedAsset) }} Amount: {{ client.wallet.assets?.[selectedAsset]?.amount ?? 0 }} </p>
       </div>
       <div class="trade-panel">
-        <h2>Trade {{ capitalizeFirstLetter(selectedCoin) }}</h2>
+        <h2>Trade {{ capitalizeFirstLetter(selectedAsset) }}</h2>
         <div class="trade-form">
           <div class="trade-type-toggle">
             <span :class="{ active: tradeType === 'buy' }" @click="tradeType = 'buy'">Buy</span>
@@ -56,7 +83,7 @@
             @click="placeOrder" 
             :class="['trade-btn', tradeType]"
           >
-            {{ tradeType === 'buy' ? 'Buy' : 'Sell' }} {{ selectedCoin.toUpperCase() }}
+            {{ tradeType === 'buy' ? 'Buy' : 'Sell' }} {{ selectedAsset.toUpperCase() }}
           </button>
         </div>
       </div>
@@ -81,20 +108,35 @@ export default {
 
       message : "Enter value here",
       cryptoData: {},
+      stockData: {},
+      selectedAsset : 'bitcoin',
       selectedCoin: 'bitcoin',
+      selectedStock: 'AAPL',
       tradeAmount: null,
       tradePrice: null,
       tradeType: 'buy',
       client: {},
       passingid: null,
       orderHistory: [],
-      symbols: ['AAPL', 'GOOGL', 'MSFT'], // Array of stock symbols
+      mode: 'crypto', // 'crypto' or 'stocks'
+      symbols: ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'NVDA', 'META'],
       prices: {}
     };
   },
   methods: {
+    switchMode(mode) {
+  console.log(`Switching mode to: ${mode}`);
+  console.log(`Current Crypto: ${this.selectedCoin}, Stock: ${this.selectedStock}`);
+  this.mode = mode;
+  if (mode === 'crypto') {
+    this.selectedAsset = this.selectedCoin;
+  } else {
+    this.selectedAsset = this.selectedStock;
+  }
+  console.log(`New Selected Asset: ${this.selectedAsset}`);
+},
 
-    fetchPrices() {
+    fetchStockPrices() {
       this.prices = {}; // Reset prices
       const API_KEY = 'ct2b3l1r01qiurr3qp20ct2b3l1r01qiurr3qp2g'; // Replace with your Finnhub API key
       
@@ -110,11 +152,18 @@ export default {
           });
       });
 
+      this.stockData = this.prices;
+      console.log('test data here :');
+      console.log(this.stockData);
+      console.log("end of test")
+
+
     },
 
     capitalizeFirstLetter(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
     },
+
     async fetchCryptoData() {
       const options = {
         method: "GET",
@@ -132,20 +181,38 @@ export default {
       try {
         const response = await axios.request(options);
         this.cryptoData = response.data;
+        console.log('test crypto data : ');
+        console.log(this.cryptoData);
       }
       catch (error) {
         console.error("Error fetching crypto data:", error);
       }
     },
-    selectCoin(coinName) {
-      this.selectedCoin = coinName;
-      this.tradePrice = this.getCurrentPrice();
-    },
+
+    // selectCoin(coinName) {
+    //   this.selectedCoin = coinName;
+    //   this.tradePrice = this.getCurrentPrice();
+    // },
 
 
-    getCurrentPrice() {
-      return this.cryptoData[this.selectedCoin]?.usd.toFixed(2) || '0.00';
-    },
+    // getCurrentPrice() {
+    //   return this.cryptoData[this.selectedCoin]?.usd.toFixed(2) || '0.00';
+    // },
+
+    selectAsset(assetName) {
+  this.selectedAsset = assetName;
+  this.tradePrice = this.getCurrentPrice();
+},
+
+getCurrentPrice() {
+  if (this.mode === 'crypto') {
+    return this.cryptoData[this.selectedAsset]?.usd.toFixed(2) || '0.00';
+  } else {
+    return this.prices[this.selectedAsset]?.c.toFixed(2) || '0.00';
+  }
+},
+
+
     calculateTotal() {
       const currentPrice = parseFloat(this.getCurrentPrice());
       return this.tradeAmount * currentPrice || 0;
@@ -166,8 +233,8 @@ export default {
       return false;
     }
   } else if (this.tradeType === 'sell') {
-    if (!wallet.assets || !wallet.assets[this.selectedCoin] || wallet.assets[this.selectedCoin].amount < this.tradeAmount) {
-      this.message = `Insufficient ${this.selectedCoin.toUpperCase()} balance`;
+    if (!wallet.assets || !wallet.assets[this.selectedAsset] || wallet.assets[this.selectedAsset].amount < this.tradeAmount) {
+      this.message = `Insufficient ${this.selectedAsset.toUpperCase()} balance`;
       return false;
     }
   }
@@ -192,17 +259,17 @@ export default {
 
   if (this.tradeType === 'buy') {
     wallet.balance -= totalAmount;
-    wallet.assets = this.updateAsset(wallet.assets, this.selectedCoin, this.tradeAmount, this.getCurrentPrice(), 'buy');
+    wallet.assets = this.updateAsset(wallet.assets, this.selectedAsset, this.tradeAmount, this.getCurrentPrice(), 'buy');
   } else if (this.tradeType === 'sell') {
     wallet.balance += totalAmount;
-    wallet.assets = this.updateAsset(wallet.assets, this.selectedCoin, this.tradeAmount, this.getCurrentPrice(), 'sell');
+    wallet.assets = this.updateAsset(wallet.assets, this.selectedAsset, this.tradeAmount, this.getCurrentPrice(), 'sell');
   }
 
   // Add transaction to history
   const transaction = {
     id: `tx-${Date.now()}`,
     type: this.tradeType,
-    coin: this.selectedCoin,
+    coin: this.selectedAsset,
     amount: this.tradeAmount,
     price: this.getCurrentPrice(),
     date: new Date().toISOString()
@@ -217,29 +284,29 @@ export default {
       
     },
     
-    updateAsset(assets, selectedCoin, tradeAmount, price, tradeType) {
+    updateAsset(assets, selectedAsset, tradeAmount, price, tradeType) {
   if (tradeType === 'buy') {
     // If the asset exists, update the amount and average price
-    if (assets[selectedCoin]) {
-      const currentAsset = assets[selectedCoin];
+    if (assets[selectedAsset]) {
+      const currentAsset = assets[selectedAsset];
       const newAmount = currentAsset.amount + tradeAmount;
       const newAveragePrice = ((currentAsset.amount * currentAsset.averagePrice) + (tradeAmount * price)) / newAmount;
-      assets[selectedCoin] = {
+      assets[selectedAsset] = {
         amount: newAmount,
         averagePrice: newAveragePrice
       };
     } else {
       // Asset does not exist, create a new entry
-      assets[selectedCoin] = {
+      assets[selectedAsset] = {
         amount: tradeAmount,
         averagePrice: price
       };
     }
   } else if (tradeType === 'sell') {
-    if (assets[selectedCoin]) {
-      assets[selectedCoin].amount -= tradeAmount;
-      if (assets[selectedCoin].amount === 0) {
-        delete assets[selectedCoin];
+    if (assets[selectedAsset]) {
+      assets[selectedAsset].amount -= tradeAmount;
+      if (assets[selectedAsset].amount === 0) {
+        delete assets[selectedAsset];
       }
     }
   }
@@ -250,7 +317,7 @@ export default {
     addToOrderHistory(type) {
       this.orderHistory.push({
         type: type,
-        coin: this.selectedCoin,
+        coin: this.selectedAsset,
         amount: this.tradeAmount,
         price: this.getCurrentPrice()
       });
@@ -294,14 +361,13 @@ export default {
       }
 }
 
-
   },
 
   mounted() {
     this.passingid = this.$route.params.id;
       this.fetchData();
     this.fetchCryptoData();
-    this.fetchPrices();
+    this.fetchStockPrices();
   }
 }
 </script>
@@ -451,6 +517,27 @@ body {
   background-color: white;
   margin: 20px;
 }
+
+.mode-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.mode-toggle button {
+  padding: 10px 20px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #f0f0f0;
+}
+
+.mode-toggle button.active {
+  background-color: #007bff;
+  color: white;
+}
+
 
 .trade-btn.buy { background-color:#4CAF50 } /* Green for buy */
 .trade-btn.sell { background-color:#f44336 } /* Red for sell */

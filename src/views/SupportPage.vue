@@ -14,7 +14,7 @@
         <br>
         <textarea type="text" placeholder="Your message..." id="message" />
         <br>
-        <button >Send your request</button>
+        <button @click="sendMail" >Send your request</button>
       </div>
 
 </div>
@@ -24,6 +24,8 @@
 
 <script>
 import Sidebar from '@/components/Sidebar.vue';
+
+import axios from 'axios';
 
 export default {
 
@@ -37,6 +39,27 @@ export default {
 
     components: {
         Sidebar
+    }, 
+    methods: {
+
+         sendMail(){
+        var mailData = {
+        recipient: 'xr888x@gmail.com',
+        name: 'zaid',
+        subject: 'Testing',
+        message: 'Hello my firend'
+      }
+      axios.post('http://localhost:8000/send-mail', mailData)
+        .then(response => {
+          alert('Email sent successfully!');
+          console.log(response);
+        })
+        .catch(error => {
+          console.error('There was an error sending the email: ', error);
+          alert('Failed to send email.');
+        });
+
+        }, 
     }
 
 }

@@ -48,28 +48,27 @@
               "x-cg-demo-api-key": "CG-ov57GBLi5Z12RAY4D3VM28gY"
             }
           });
+          console.log(response);
           this.updateChart(response.data.prices);
         } catch (error) {
           console.error("Error fetching crypto data:", error);
         }
       },
-      async fetchStockData() {
-        const API_KEY = 'ct2b3l1r01qiurr3qp20ct2b3l1r01qiurr3qp2g'; // Replace with your actual API key
-        const url = `https://finnhub.io/api/v1/stock/candle`;
-        const params = {
-          symbol: this.selectedSymbol,
-          resolution: 'D',
-          from: Math.floor(Date.now() / 1000) - 7 * 86400,
-          to: Math.floor(Date.now() / 1000),
-          token: API_KEY
-        };
-        try {
-          const response = await axios.get(url, { params });
-          this.updateChart(response.data.t.map(ts => [ts * 1000, response.data.c[response.data.t.indexOf(ts)]]));
-        } catch (error) {
-          console.error("Error fetching stock data:", error);
-        }
-      },
+      fetchStockData() {
+      const params = {
+        symbol: this.selectedSymbol,  // Example: Google's stock symbol
+        period: '5d',
+        interval: '1d'
+      };
+
+      axios.get('http://localhost:8000/fetch-stock-data', { params })
+        .then(response => {
+          this.updateChart(response.data);  // Assuming you have a method to update the chart
+        })
+        .catch(error => {
+          console.error('Error fetching stock data:', error);
+        });
+    },
       formatDate(timestamp) {
   const date = new Date(timestamp);
   const day = date.getDate();
