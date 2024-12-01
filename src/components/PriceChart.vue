@@ -61,7 +61,7 @@
         interval: '1d'
       };
 
-      axios.get('http://localhost:8000/fetch-stock-data', { params })
+      axios.get('https://actweb-7fe7b7402375.herokuapp.com/fetch-stock-data', { params })
         .then(response => {
           this.updateChart(response.data);  // Assuming you have a method to update the chart
         })

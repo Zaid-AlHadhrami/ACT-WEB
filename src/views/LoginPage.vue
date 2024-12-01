@@ -62,35 +62,53 @@ export default {
 
 </script>
     
-    <style>
-    
-    .login{
-        margin: 0;
-        padding: 20px;
-    }
-    
-    input{
-        margin: 5px;
-        width: 20%;
-        padding: 10px;
-    }
-    
-    button{
-        width: 10%;
-        margin-top: 10px;
-        cursor: pointer;
-    }
-    
-    p{
-        font-size: 14px;
-        margin-top: 40px;
-    }
-    
-    p a {
-        text-decoration: underline;
-        cursor: pointer;
-    }
-    
-    
-    
-    </style>
+<style>
+.login {
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+input {
+  margin: 10px 0;
+  width: 90%;
+  max-width: 300px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+button {
+  width: 90%;
+  max-width: 300px;
+  margin-top: 15px;
+  padding: 12px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+p {
+  font-size: 14px;
+  margin-top: 30px;
+  text-align: center;
+}
+
+p a {
+  text-decoration: underline;
+  cursor: pointer;
+  color: #007bff;
+}
+
+@media (min-width: 768px) {
+  input, button {
+    width: 300px;
+  }
+}
+</style>

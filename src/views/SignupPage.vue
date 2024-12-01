@@ -63,24 +63,16 @@ export default {
 
 </script>
 
-<style scoped>
+<style>
 
 .SignUp{
     margin: 0;
     padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-input{
-    margin: 5px;
-    width: 20%;
-    padding: 10px;
-}
-
-button{
-    width: 10%;
-    margin-top: 10px;
-    cursor: pointer;
-}
 
 p{
     font-size: 14px;

@@ -46,7 +46,10 @@
   <script>
   import { auth, db } from "../FirebaseConfig";
 import {  addDoc, collection, getDocs, doc, where, query, onSnapshot } from "firebase/firestore";
+import {createUserWithEmailAndPassword } from "firebase/auth";
+
   import Sidebar from "@/components/Sidebar.vue";
+import { sendMail } from "@/services/mail";
   
   export default {
     data() {
@@ -108,6 +111,21 @@ console.log(id);
     console.error("Error adding document: ", e);
   }   
   this.clients.push({ ...this.newClient });
+
+
+  createUserWithEmailAndPassword(auth, this.newClient.email, '1231234')
+      .then(async (userCredential) => {
+        const user = userCredential.user;
+        alert("usear is created!");
+        sendMail(this.newClient.email, this.newClient.name)
+        console.log('User signed up:', this.newClient.email, user);  // Debugging line to confirm the user was signed up
+      })
+      .catch((error) => {
+        console.error('Error during sign up:', error.code, error.message);  // Debugging line for error handling
+        alert("Opps! " + error.message);
+      });
+
+
   this.newClientVisible = false; // Hide the form after saving
 }
       ,

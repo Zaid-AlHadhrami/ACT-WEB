@@ -25,7 +25,7 @@
 <script>
 import Sidebar from '@/components/Sidebar.vue';
 
-import axios from 'axios';
+import {sendMail} from '../services/mail';
 
 export default {
 
@@ -42,24 +42,8 @@ export default {
     }, 
     methods: {
 
-         sendMail(){
-        var mailData = {
-        recipient: 'xr888x@gmail.com',
-        name: 'zaid',
-        subject: 'Testing',
-        message: 'Hello my firend'
-      }
-      axios.post('http://localhost:8000/send-mail', mailData)
-        .then(response => {
-          alert('Email sent successfully!');
-          console.log(response);
-        })
-        .catch(error => {
-          console.error('There was an error sending the email: ', error);
-          alert('Failed to send email.');
-        });
+      sendMail
 
-        }, 
     }
 
 }
