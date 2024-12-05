@@ -14,7 +14,7 @@
         <br>
         <textarea type="text" placeholder="Your message..." id="message" />
         <br>
-        <button @click="sendMail" >Send your request</button>
+        <button @click="test" >Send your request</button>
       </div>
 
 </div>
@@ -26,6 +26,7 @@
 import Sidebar from '@/components/Sidebar.vue';
 
 import {sendMail} from '../services/mail';
+import { useUserStore } from '@/stores/userStore';
 
 export default {
 
@@ -42,7 +43,11 @@ export default {
     }, 
     methods: {
 
-      sendMail
+      sendMail, 
+      test(){
+        const store = useUserStore();
+        console.log(store.user);
+      }
 
     }
 

@@ -45,7 +45,7 @@
   
   <script>
   import { auth, db } from "../FirebaseConfig";
-import {  addDoc, collection, getDocs, doc, where, query, onSnapshot } from "firebase/firestore";
+import {  setDoc, collection, getDocs, doc, where, query, onSnapshot } from "firebase/firestore";
 import {createUserWithEmailAndPassword } from "firebase/auth";
 
   import Sidebar from "@/components/Sidebar.vue";
@@ -93,41 +93,41 @@ console.log(id);
       
       async saveData() {
         const walletObject = {
-        balance: 0,
-        transactions: []
-      };
+          balance: 0,
+          transactions: []
+        };
+
         try {
-    const docRef = await addDoc(collection(this.managerRef, "clients"), {
-     customId: this.generateID(),
-     name : this.newClient.name,
-     email : this.newClient.email,
-     phoneNumber : this.newClient.phoneNumber,
-     wallet : walletObject
+          // Create user and get userid
+          const userCredential = await createUserWithEmailAndPassword(auth, this.newClient.email, '1231234');
+          const user = userCredential.user;
+          const userid = user.uid;
 
-    });
-    this.newClient.id = docRef.id ;
-    console.log("Document written with ID: ", docRef.id);
-  } catch (e) {
-    console.error("Error adding document: ", e);
-  }   
-  this.clients.push({ ...this.newClient });
+          alert("User is created!");
+          sendMail(this.newClient.email, this.newClient.name);
+          console.log('User signed up:', this.newClient.email, user);
 
+          // Save client data
+          await setDoc(doc(this.managerRef, "clients", userid), {
+            customId: this.generateID(),
+            name: this.newClient.name,
+            email: this.newClient.email,
+            phoneNumber: this.newClient.phoneNumber,
+            wallet: walletObject
+          });
 
-  createUserWithEmailAndPassword(auth, this.newClient.email, '1231234')
-      .then(async (userCredential) => {
-        const user = userCredential.user;
-        alert("usear is created!");
-        sendMail(this.newClient.email, this.newClient.name)
-        console.log('User signed up:', this.newClient.email, user);  // Debugging line to confirm the user was signed up
-      })
-      .catch((error) => {
-        console.error('Error during sign up:', error.code, error.message);  // Debugging line for error handling
-        alert("Opps! " + error.message);
-      });
+          console.log("Document written with ID: ", userid);
+          
+          this.newClient.id = userid;
+          this.clients.push({ ...this.newClient });
+          this.newClientVisible = false; // Hide the form after saving
 
+        } catch (error) {
+          console.error('Error during sign up or adding document:', error.code, error.message);
+          alert("Oops! " + error.message);
+        }
+      }
 
-  this.newClientVisible = false; // Hide the form after saving
-}
       ,
       logout() {
         auth.signOut().then(() => {

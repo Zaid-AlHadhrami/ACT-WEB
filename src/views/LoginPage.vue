@@ -17,6 +17,8 @@ import {auth} from "../FirebaseConfig" ;
 
 import {signInWithEmailAndPassword, sendPasswordResetEmail} from "firebase/auth";
 
+import { useUserStore } from "@/stores/userStore";
+
 export default {
         /* eslint-disable no-unused-vars */
       // eslint-disable-next-line vue/multi-word-component-names
@@ -25,24 +27,32 @@ export default {
         return {}
     }, 
     methods: {
-        login() {
-
-            signInWithEmailAndPassword(auth, this.email, this.password)
-  .then((userCredential) => {
-    // Signed in 
+      async login() {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, this.email, this.password);
+    // Signed in
     const user = userCredential.user;
-    localStorage.setItem('userId', user.uid);
+    const userStore = useUserStore();
 
-    this.$router.replace(`/home/${user.uid}`)
+    // Await the completion of user setting
+    await userStore.setUser(user);
 
- 
-  })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-  });
-            
-        },
+    console.log(userStore.userType);
+    localStorage.setItem('userType', userStore.userType); // Persist user type
+    localStorage.setItem('userId', userStore.userData.uid);
+    console.log(userStore.userData.uid);
+
+    if (userStore.userType === 'admin') {
+      this.$router.replace(`/client/${user.uid}`);
+    } else {
+      this.$router.replace(`/home/${user.uid}`);
+    }
+  } catch (error) {
+    console.error('Login failed:', error);
+    // Handle errors (e.g., wrong credentials)
+  }
+}
+,
 
     forgotPassword(){
         sendPasswordResetEmail(auth, this.email)
@@ -62,7 +72,7 @@ export default {
 
 </script>
     
-<style>
+<style scoped>
 .login {
   margin: 0;
   padding: 20px;

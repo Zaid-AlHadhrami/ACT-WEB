@@ -8,6 +8,7 @@ import {auth} from './FirebaseConfig';
 import ClientPage from "./views/ClientPage.vue";
 import DashBoard from "./views/DashBoard.vue";
 import LandingPage from "./views/LandingPage.vue";
+import { useUserStore } from "./stores/userStore";
 
 
 const router = createRouter ({
@@ -67,6 +68,13 @@ const router = createRouter ({
    router.beforeEach((to, from, next) => {
         const currentUser =  auth.currentUser;
         const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+
+        const userStore = useUserStore();
+
+        if (currentUser && !userStore.user) {
+            // If Firebase has a user but Pinia doesn't, update Pinia
+            userStore.setUser(currentUser);
+        }
 
         if (requiresAuth && !currentUser) {
             if(to.path !== '/login') {

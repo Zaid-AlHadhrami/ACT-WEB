@@ -2,8 +2,7 @@
     <div class="Client-Page">
       <Sidebar />
       <div class="main-content">
-        <h1>Client Information</h1>
-        <div class="client-details">
+        <h1>{{ isAdmin ? 'Your Information' : 'Client Information' }}</h1>        <div class="client-details">
           <h2>{{ client.name }}</h2>
           <p><strong>Email:</strong> {{ client.email }}</p>
           <p><strong>Phone:</strong> {{ client.phoneNumber }}</p>
@@ -43,25 +42,54 @@
   import { auth, db } from "../FirebaseConfig";
   import { doc, getDoc, setDoc} from "firebase/firestore";
   import Sidebar from "@/components/Sidebar.vue";
-  
+import { useUserStore } from "@/stores/userStore";
+import { computed } from 'vue'
+
+
+
   export default {
+
     data() {
       return {
+        store : useUserStore(),
         client: {},
         passingid: null,
-        managerRef: null
+        managerRef: null,
+        isAdmin : false
       };
     },
     components: {
       Sidebar
     },
+
     mounted() {
-      this.passingid = this.$route.params.id;
-      this.managerRef = doc(db, "managers", localStorage.getItem('userId'));
-      this.fetchData();
-    },
+
+      
+
+  this.passingid = this.$route.params.id;
+
+  const userType = localStorage.getItem('userType');
+
+  console.log(userType)
+
+
+  if (this.passingid) {
+      if (this.store.isAdmin) {
+        this.isAdmin = true
+        this.client = this.store.userData;
+      } else {
+        this.managerRef = doc(db, "managers", localStorage.getItem('userId'));
+        this.fetchData();
+      }
+    }
+  }
+
+,
   
     methods: {
+
+
+
       navToOrderPage(){
       this.$router.replace(`/cryptolist/${this.passingid}`);
 
@@ -125,7 +153,11 @@
       this.fundsToAdd = null;
     },
     async updateClientData() {
-      const clientRef = doc(this.managerRef, 'clients', this.client.id);
+
+
+      const clientRef = this.store.isAdmin ? this.store.userDocRef : doc(this.managerRef, 'clients', this.client.id);
+
+      // const clientRef = doc(this.managerRef, 'clients', this.client.id);
       
       try {
         await setDoc(clientRef, { wallet: this.client.wallet }, { merge: true });

@@ -100,12 +100,13 @@
 import axios from 'axios';
 import PriceChart from '@/components/PriceChart.vue';
 import Sidebar from '@/components/Sidebar.vue';
+import { useUserStore } from "@/stores/userStore";
 
 export default {
   components: { PriceChart, Sidebar },
   data() {
     return {
-
+      store: useUserStore(),
       message : "Enter value here",
       cryptoData: {},
       stockData: {},
@@ -323,7 +324,14 @@ getCurrentPrice() {
       });
     },
     async fetchData() {
-        const docRef = doc(db, "managers", localStorage.getItem('userId'), "clients", this.passingid);
+
+
+          if(this.store.isAdmin){
+
+            this.client = this.store.userData;
+
+          } else {
+            const docRef = doc(db, "managers", localStorage.getItem('userId'), "clients", this.passingid);
         try {
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
@@ -338,11 +346,18 @@ getCurrentPrice() {
         } catch (error) {
           console.error("Error fetching client data: ", error);
         }
+          }
+
+
       },
 
       async updateWalletData(wallet, transaction) {
 
-        const docRef = doc(db, "managers", localStorage.getItem('userId'), "clients", this.passingid);
+        var docRef = doc(db, "managers", localStorage.getItem('userId'), "clients", this.passingid);
+        if(this.store.isAdmin){
+          docRef = this.store.userDocRef;
+        } 
+
 
   // Ensure transactions array exists
   if (!wallet.transactions) {

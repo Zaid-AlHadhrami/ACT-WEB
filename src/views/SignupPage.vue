@@ -8,6 +8,17 @@
 <input type="text" v-model="email" placeholder="Email"> <br>
 <input type="password" v-model="password" placeholder="Password"> <br>
 
+<div class="radio-group">
+      <label>
+        <input type="radio" v-model="userType" value="manager">
+        Manager
+      </label>
+      <label>
+        <input type="radio" v-model="userType" value="admin">
+        Admin
+      </label>
+    </div>
+
 <button @click="signUp">Sign Up</button> <br>
 <p> Already have an account? Click <RouterLink to="/login"> here.</RouterLink>  </p></div>
 </template>
@@ -24,7 +35,7 @@ export default {
     // eslint-disable-next-line vue/multi-word-component-names
     name : 'SignUp',
     data(){
-        return {email:'',password:'', username:'', 
+        return {email:'',password:'', username:'', userType : ''
 
 
         }
@@ -49,13 +60,46 @@ export default {
 
   async storeCreatedUserData(user){
                         // Store user info in Firestore under the "restaurants" collection
+
+                        const walletObject = {
+          balance: 0,
+          transactions: []
+        };
+        
+
+
+                        if( this.userType == 'manager'){
+
+
+                          this.$router.replace(`/home/${user.uid}`)
+
+
                 const userDocRef = doc(db, "managers", user.uid); // Using user UID as the document identifier
                 await setDoc(userDocRef, {
                     uid: user.uid,
                     name: this.name,
                     email: this.email
-                    // Add other user details here as needed
                 });
+
+                        } else {
+
+                          this.$router.replace(`/client/${user.uid}`)
+
+                          const userDocRef = doc(db, "admins", user.uid); // Using user UID as the document identifier
+                await setDoc(userDocRef, {
+                    uid: user.uid,
+                    name: this.name,
+                    email: this.email,
+                    wallet: walletObject,
+                });
+                        }
+
+                        const userDocRef = doc(db, "users", user.uid); // Using user UID as the document identifier
+                await setDoc(userDocRef, {
+                    uid: user.uid,
+                    userType : this.userType
+                });
+
   }
 
 },
@@ -63,7 +107,7 @@ export default {
 
 </script>
 
-<style>
+<style scoped>
 
 .SignUp{
     margin: 0;
@@ -72,16 +116,39 @@ export default {
   flex-direction: column;
   align-items: center;
 }
+input {
+  margin: 10px 0;
+  width: 90%;
+  max-width: 300px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
 
+button {
+  width: 90%;
+  max-width: 300px;
+  margin-top: 15px;
+  padding: 12px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+}
 
-p{
-    font-size: 14px;
-    margin-top: 40px;
+p {
+  font-size: 14px;
+  margin-top: 30px;
+  text-align: center;
 }
 
 p a {
-    text-decoration: underline;
-    cursor: pointer;
+  text-decoration: underline;
+  cursor: pointer;
+  color: #007bff;
 }
 
 
