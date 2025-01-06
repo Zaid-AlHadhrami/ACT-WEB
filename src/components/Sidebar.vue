@@ -3,7 +3,9 @@
 
         <button @click="NavTo(DashBoardRoute)">Dashboard</button>
         <button v-if="store.isManager" @click="NavTo(`/home/${userid}`)">Clients</button>
+        <button @click="NavTo('/notifications')">Notifications</button>
         <button @click="NavTo('/support')">Support</button>
+
         <button @click="logout">Logout</button>
 
     </div>

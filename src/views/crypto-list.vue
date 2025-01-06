@@ -139,7 +139,7 @@ export default {
 
     fetchStockPrices() {
       this.prices = {}; // Reset prices
-      const API_KEY = 'ct2b3l1r01qiurr3qp20ct2b3l1r01qiurr3qp2g'; // Replace with your Finnhub API key
+      const API_KEY = 'ct2b3l1r01qiurr3qp20ct2b3l1r01qiurr3qp2g'; 
       
       this.symbols.forEach(symbol => {
         const url = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`;
@@ -190,15 +190,7 @@ export default {
       }
     },
 
-    // selectCoin(coinName) {
-    //   this.selectedCoin = coinName;
-    //   this.tradePrice = this.getCurrentPrice();
-    // },
 
-
-    // getCurrentPrice() {
-    //   return this.cryptoData[this.selectedCoin]?.usd.toFixed(2) || '0.00';
-    // },
 
     selectAsset(assetName) {
   this.selectedAsset = assetName;
@@ -400,14 +392,14 @@ body {
   
 
   .sidebar {
-  background-color: #202123; /* Just an example background color */
+  background-color: #202123; 
   overflow-y: auto; /* Scroll if content overflows */
 }
 
 .main-content {
   display: flex;
   flex-grow: 1; /* Main content takes up the remaining space */
-  padding: 20px; /* Optional padding */
+  padding: 20px; 
   align-items: center;
 }
   

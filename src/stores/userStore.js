@@ -1,7 +1,7 @@
 // stores/userStore.js
 import { defineStore } from 'pinia'
 import { db } from '../FirebaseConfig'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, getDocs, collection } from 'firebase/firestore'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -29,23 +29,45 @@ console.log('no user')      }
     },
 
     async fetchUserType() {
-      const types = ['admins', 'managers']
-      for (const type of types) {
-        const docRef = doc(db, type, this.user.uid)
-        this.userDocRef = docRef ;
-        const docSnap = await getDoc(docRef)
-        if (docSnap.exists()) {
-          this.userType = type.slice(0, -1) // Remove the trailing "s" to get singular form
-          return
+        const types = ['admins', 'managers'];
+      
+        // Check if user is an admin or manager
+        for (const type of types) {
+          const docRef = doc(db, type, this.user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            this.userType = type.slice(0, -1); // Remove trailing "s"
+            this.userDocRef = docRef; // Set userDocRef for later use
+            return;
+          }
         }
-      }
-      // Default to client if no document is found
-      this.userType = 'client'
-    },
+      
+        // If not found in admins or managers, check as a client
+        this.userType = 'client';
+        const managersSnapshot = await getDocs(collection(db, 'managers'));
+      
+        // Log user ID for debugging
+        console.log('Checking for client with UID:', this.user.uid);
+      
+        for (const managerDoc of managersSnapshot.docs) {
+          const clientDocRef = doc(managerDoc.ref, 'clients', this.user.uid); // Reference to client's document
+      
+          console.log('Checking client document:', clientDocRef.path); // Log the path being checked
+      
+          const docSnap = await getDoc(clientDocRef);
+          if (docSnap.exists()) {
+            console.log('success : tick')
+            this.userDocRef = clientDocRef; // Set userDocRef for later use
+            return;
+          }
+          console.log('Client document does not exist:', clientDocRef.path); // Log non-existence
+        }
+      
+      },
 
     async fetchUserData() {
       if (!this.user || !this.userType) return
-      const docRef = doc(db, `${this.userType}s`, this.user.uid)
+      const docRef = this.userDocRef
       const docSnap = await getDoc(docRef)
       if (docSnap.exists()) {
         this.userData = docSnap.data()

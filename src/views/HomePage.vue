@@ -104,7 +104,25 @@ console.log(id);
           const userid = user.uid;
 
           alert("User is created!");
-          sendMail(this.newClient.email, this.newClient.name);
+
+
+          var temporaryPassword = '1231234';
+
+var mailData = {
+html : 'mail.html',
+recipient: this.newClient.email,
+name: this.newClient.name,
+subject: 'welcome',
+message: `
+Your Account Details:
+- Username: ${this.newClient.email}
+- Temporary Password: ${temporaryPassword}
+`
+
+}
+
+
+          sendMail(mailData);
           console.log('User signed up:', this.newClient.email, user);
 
           // Save client data
@@ -185,7 +203,7 @@ console.log(id);
   }
 
   .sidebar {
-  background-color: #202123; /* Just an example background color */
+  background-color: #202123; 
   overflow-y: auto; /* Scroll if content overflows */
 }
 
@@ -199,7 +217,7 @@ console.log(id);
     margin-top: 100px;
     border-radius: 5px;
     background-color: white;
-    width: 50%; /* Set a fixed width for the list */
+    width: 50%; 
     margin: 0 auto; /* Center the list horizontally */
     display: flex;
     flex-direction: column; /* Stacks cards vertically */

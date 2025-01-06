@@ -42,7 +42,7 @@ export default {
     localStorage.setItem('userId', userStore.userData.uid);
     console.log(userStore.userData.uid);
 
-    if (userStore.userType === 'admin') {
+    if (userStore.userType === 'admin' || userStore.userType === 'client') {
       this.$router.replace(`/client/${user.uid}`);
     } else {
       this.$router.replace(`/home/${user.uid}`);

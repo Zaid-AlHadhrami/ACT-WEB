@@ -30,6 +30,8 @@
 import {auth, db } from "../FirebaseConfig" ;
 import {doc, setDoc} from 'firebase/firestore'
 import {createUserWithEmailAndPassword } from "firebase/auth";
+import { useUserStore } from "@/stores/userStore";
+import { sendMail } from "@/services/mail";
 export default {
     /* eslint-disable no-unused-vars */
     // eslint-disable-next-line vue/multi-word-component-names
@@ -41,25 +43,57 @@ export default {
         }
     }, 
     methods: {
-      signUp() {
+      async signUp() {
+  try {
+    //  Create user with email and password
+    const userCredential = await createUserWithEmailAndPassword(auth, this.email, this.password);
+    const user = userCredential.user; // Get the newly created user
 
-   createUserWithEmailAndPassword(auth, this.email, this.password)
-      .then(async (userCredential) => {
-        const user = userCredential.user;
-        this.$router.replace(`/home/${user.uid}`)
-        // calling the method to store the managers data 
-        this.storeCreatedUserData(user);
-        alert("usear is created!");
-        console.log('User signed up:', this.email, user);  // Debugging line to confirm the user was signed up
-      })
-      .catch((error) => {
-        console.error('Error during sign up:', error.code, error.message);  // Debugging line for error handling
-        alert("Opps! " + error.message);
-      });
-  },
+    //  Store the user's data in Firestore
+    await this.storeCreatedUserData(user); // Call your method to store user data
+
+    //  Now set the user in the store
+    const userStore = useUserStore();
+    await userStore.setUser(user); // This should retrieve and set user data from Firestore
+
+    //  Check if userData is available after setting the user
+    if (userStore.userData) {
+      localStorage.setItem('userType', userStore.userType); // Persist user type
+      localStorage.setItem('userId', userStore.userData.uid);
+      console.log('User ID:', userStore.userData.uid);
+
+      //  Redirect based on user type
+      if (userStore.userType === 'admin') {
+        this.$router.replace(`/client/${user.uid}`);
+      } else {
+        this.$router.replace(`/home/${user.uid}`);
+      }
+
+      alert("User is created!");
+
+      var mailData = {
+html : 'signUpMail.html',
+recipient: this.email,
+name: this.username,
+subject: 'welcome',
+message: 'Enjoy'
+
+}
+
+
+          sendMail(mailData);
+      console.log('User signed up:', this.email, user);
+    } else {
+      console.error('User data is not available after signup.');
+    }
+
+  } catch (error) {
+    console.error('Signup failed:', error);
+  }
+}
+,
 
   async storeCreatedUserData(user){
-                        // Store user info in Firestore under the "restaurants" collection
 
                         const walletObject = {
           balance: 0,
@@ -67,11 +101,7 @@ export default {
         };
         
 
-
                         if( this.userType == 'manager'){
-
-
-                          this.$router.replace(`/home/${user.uid}`)
 
 
                 const userDocRef = doc(db, "managers", user.uid); // Using user UID as the document identifier
@@ -82,8 +112,6 @@ export default {
                 });
 
                         } else {
-
-                          this.$router.replace(`/client/${user.uid}`)
 
                           const userDocRef = doc(db, "admins", user.uid); // Using user UID as the document identifier
                 await setDoc(userDocRef, {
@@ -102,7 +130,8 @@ export default {
 
   }
 
-},
+}
+
 }
 
 </script>

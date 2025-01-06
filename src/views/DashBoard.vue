@@ -62,7 +62,7 @@ this.clientCount = snapshot.data().count;
 <style>
 
 body {
-    margin: 0; /* Remove default margin */
+    margin: 0; 
   }
   
   .dashboard {
@@ -72,13 +72,13 @@ body {
   }
 
   .sidebar {
-  background-color: #202123; /* Just an example background color */
+  background-color: #202123; 
   overflow-y: auto; /* Scroll if content overflows */
 }
 
 .main-content {
     flex-grow: 1;
-  padding: 20px; /* Optional padding */
+  padding: 20px; 
   align-items: center;
 }
 

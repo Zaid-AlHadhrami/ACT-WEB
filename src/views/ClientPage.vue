@@ -27,18 +27,26 @@
           </ul>
           <p v-else>No assets available.</p>
         </div>
+
+        <br>
+
+
+      <br>
+
                 <!-- Form to Add Funds -->
                 <input type="number" v-model="fundsToAdd" placeholder="Amount to add" />
         <button @click="addFunds">Add Funds</button>
 
         <br>
-
+              <!-- Export to PDF Button -->
+              <button @click="exportToPDF">Export to PDF</button>
         <button @click="navToOrderPage" > Trade </button>
       </div>
     </div>
   </template>
   
   <script>
+  import jsPDF from "jspdf";
   import { auth, db } from "../FirebaseConfig";
   import { doc, getDoc, setDoc} from "firebase/firestore";
   import Sidebar from "@/components/Sidebar.vue";
@@ -68,18 +76,20 @@ import { computed } from 'vue'
 
   this.passingid = this.$route.params.id;
 
-  const userType = localStorage.getItem('userType');
-
-  console.log(userType)
 
 
   if (this.passingid) {
-      if (this.store.isAdmin) {
-        this.isAdmin = true
-        this.client = this.store.userData;
-      } else {
+
+    
+      if (this.store.isManager) {
+
         this.managerRef = doc(db, "managers", localStorage.getItem('userId'));
         this.fetchData();
+      } 
+      else {
+        this.client = this.store.userData;
+        this.isAdmin = true
+
       }
     }
   }
@@ -87,6 +97,78 @@ import { computed } from 'vue'
 ,
   
     methods: {
+
+      exportToPDF() {
+  const doc = new jsPDF();
+
+  // Formatting constants
+  let marginLeft = 10;
+  let yPosition = 10;
+  const lineHeight = 10;
+
+  // Add Client Information
+  doc.setFontSize(14);
+  doc.text(`Client Name: ${this.client.name || 'N/A'}`, marginLeft, yPosition);
+  yPosition += lineHeight;
+  doc.text(`Email: ${this.client.email || 'N/A'}`, marginLeft, yPosition);
+  yPosition += lineHeight;
+  doc.text(`Phone: ${this.client.phoneNumber || 'N/A'}`, marginLeft, yPosition);
+  yPosition += lineHeight;
+
+  // Add Wallet Balance
+  if (this.client.wallet?.balance != null) {
+    doc.text(`Wallet Balance: $${this.client.wallet.balance.toFixed(2)}`, marginLeft, yPosition);
+    yPosition += lineHeight;
+  }
+
+  // Add Transactions
+  if (this.client.wallet?.transactions?.length > 0) {
+    doc.text("Transactions:", marginLeft, yPosition);
+    yPosition += lineHeight;
+    this.client.wallet.transactions.forEach((transaction) => {
+      const date = new Date(transaction.date).toLocaleString();
+      const description = transaction.description || "No description provided";
+      doc.text(
+        `- ${transaction.type.toUpperCase()}: $${transaction.amount.toFixed(2)} on ${date} - ${description}`,
+        marginLeft + 5,
+        yPosition
+      );
+      yPosition += lineHeight;
+    });
+  } else {
+    doc.text("No transactions available.", marginLeft, yPosition);
+    yPosition += lineHeight;
+  }
+
+  // Add Assets
+  if (this.client.wallet?.assets && typeof this.client.wallet.assets === "object") {
+    const assets = this.client.wallet.assets;
+
+    // Handle assets as an array or object
+    if (Array.isArray(assets) && assets.length > 0) {
+      doc.text("Assets:", marginLeft, yPosition);
+      yPosition += lineHeight;
+      assets.forEach((asset) => {
+        doc.text(`- ${asset}`, marginLeft + 5, yPosition);
+        yPosition += lineHeight;
+      });
+    } else if (!Array.isArray(assets) && Object.keys(assets).length > 0) {
+      doc.text("Assets:", marginLeft, yPosition);
+      yPosition += lineHeight;
+      Object.entries(assets).forEach(([key, value]) => {
+        const formattedValue = typeof value === "object" ? JSON.stringify(value) : value;
+        doc.text(`- ${key}: ${formattedValue}`, marginLeft + 5, yPosition);
+        yPosition += lineHeight;
+      });
+    } else {
+      doc.text("No assets available.", marginLeft, yPosition);
+      yPosition += lineHeight;
+    }
+  }
+
+  // Save the PDF
+  doc.save(`${this.client.name}_details.pdf`);
+},
 
 
 
@@ -157,7 +239,6 @@ import { computed } from 'vue'
 
       const clientRef = this.store.isAdmin ? this.store.userDocRef : doc(this.managerRef, 'clients', this.client.id);
 
-      // const clientRef = doc(this.managerRef, 'clients', this.client.id);
       
       try {
         await setDoc(clientRef, { wallet: this.client.wallet }, { merge: true });
@@ -187,13 +268,13 @@ body {
   }
 
   .sidebar {
-  background-color: #202123; /* Just an example background color */
+  background-color: #202123; 
   overflow-y: auto; /* Scroll if content overflows */
 }
 
 .main-content {
-  flex-grow: 1; /* Main content takes up the remaining space */
-  padding: 20px; /* Optional padding */
+  flex-grow: 1; 
+  padding: 20px; 
   align-items: center;
 }
   .client-details {
@@ -218,5 +299,9 @@ body {
   
   li {
     margin-bottom: 10px;
+  }
+
+  button {
+    margin-right: 10px;
   }
   </style>

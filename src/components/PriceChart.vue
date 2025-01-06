@@ -11,7 +11,7 @@
   Chart.register(...registerables);
   
   export default {
-    props: ['selectedSymbol', 'mode'], // 'mode' is now a prop
+    props: ['selectedSymbol', 'mode'],
     data() {
       return {
         chart: null
@@ -56,14 +56,14 @@
       },
       fetchStockData() {
       const params = {
-        symbol: this.selectedSymbol,  // Example: Google's stock symbol
+        symbol: this.selectedSymbol,  
         period: '5d',
         interval: '1d'
       };
 
       axios.get('https://actweb-7fe7b7402375.herokuapp.com/fetch-stock-data', { params })
         .then(response => {
-          this.updateChart(response.data);  // Assuming you have a method to update the chart
+          this.updateChart(response.data);  
         })
         .catch(error => {
           console.error('Error fetching stock data:', error);

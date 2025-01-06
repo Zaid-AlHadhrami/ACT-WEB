@@ -1,22 +1,10 @@
 import axios from 'axios';
 
-export function sendMail(mail, name){ 
+export function sendMail(mailData){ 
 
-  
-    var temporaryPassword = '1231234';
 
-    var mailData = {
-    recipient: mail,
-    name: name,
-    subject: 'welcome',
-    message: `
-    Your Account Details:
-    - Username: ${mail}
-    - Temporary Password: ${temporaryPassword}
-    `
 
-  }
-  axios.post('https://actweb-7fe7b7402375.herokuapp.com/send-mail', mailData)
+  axios.post('http://localhost:5005/send-mail', mailData)
     .then(response => {
       alert('Email sent successfully!');
       console.log(response);

@@ -9,6 +9,7 @@ import ClientPage from "./views/ClientPage.vue";
 import DashBoard from "./views/DashBoard.vue";
 import LandingPage from "./views/LandingPage.vue";
 import { useUserStore } from "./stores/userStore";
+import NotificationsPage from "./views/notificationsPage.vue";
 
 
 const router = createRouter ({
@@ -58,7 +59,12 @@ const router = createRouter ({
         {path: '/client/:id',
             name: 'client',
             component: ClientPage
-        }
+        },
+        {path: '/notifications',
+            component: NotificationsPage
+        },
+
+
         
     ]
     });
